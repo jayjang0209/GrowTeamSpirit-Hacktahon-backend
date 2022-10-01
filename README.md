@@ -1,1 +1,1 @@
-# GrowTeamSpirit-Hacktahon-
+# GrowTeamSpirit-Hacktahon-backend
