@@ -1,0 +1,28 @@
+{
+  "name": "hackathon-sap-db-beckend",
+  "version": "1.0.0",
+  "description": "<!-- title: 'AWS Python Example' description: 'This template demonstrates how to deploy a Python function running on AWS Lambda using the traditional Serverless Framework.' layout: Doc framework: v3 platform: AWS language: python priority: 2 authorLink: 'https://github.com/serverless' authorName: 'Serverless, inc.' authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4' -->",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jayjang0209/GrowTeamSpirit-Hacktahon-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jayjang0209/GrowTeamSpirit-Hacktahon-backend/issues"
+  },
+  "homepage": "https://github.com/jayjang0209/GrowTeamSpirit-Hacktahon-backend#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1227.0",
+    "serverless": "^3.22.0",
+    "serverless-add-api-key": "^4.2.1",
+    "serverless-offline": "^11.0.0",
+    "serverless-prune-plugin": "^2.0.1",
+    "serverless-python-requirements": "^5.4.0"
+  }
+}
