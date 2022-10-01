@@ -85,3 +85,51 @@ def get_user_data(event, table):
         Key={'id': user_id}
     )
     return utils.build_response(200, res['Item'])
+
+
+def get_all_list_of_attribute(event, table):
+    category = event['pathParameters']['category']
+
+    res = table.scan(
+        AttributesToGet = [category]
+    )
+    
+    unique_attribute = []
+
+    for item in res['Items']:
+        if category in item.keys():
+            if item[category] not in unique_attribute:
+                unique_attribute.append(item[category])
+
+    # unique_interest = []
+    # for item in res['Items']:
+    #     if category in item.keys():
+    #         for interest in item[category]:
+    #             if interest not in unique_interest:
+    #                 unique_interest.append(interest)
+    return utils.build_response(200, unique_attribute)
+
+
+
+
+def get_all_list_of_interest(event, table):
+    """
+    Get all list of each interest.
+
+    :param event: JSON formatted data triggered from an HTTP call via API gateway
+    :param table: target table
+    :return: response containing status code, headers, and body
+    """
+    category = event['pathParameters']['category']
+
+    res = table.scan(
+        AttributesToGet = [category]
+    )
+
+    unique_interest = []
+    for item in res['Items']:
+        if category in item.keys():
+            for interest in item[category]:
+                if interest not in unique_interest:
+                    unique_interest.append(interest)
+    return utils.build_response(200, unique_interest)

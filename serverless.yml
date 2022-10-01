@@ -42,6 +42,7 @@ provider:
       - "dynamodb:UpdateItem"
       - "dynamodb:DeleteItem"
       - "dynamodb:Query"
+      - "dynamodb:Scan"
     Resource: 
       - "arn:aws:dynamodb:${opt: region, self:provider.region}:*:table/${self:provider.environment.USER_TABLE}"
 
@@ -90,6 +91,36 @@ functions:
             parameters:
               paths:
                 user_id: true
+
+  get-all-list-of-interest:
+    handler: api/user/data.lambda_handler
+    description: GET /user/interest
+    events:
+      - http:
+          path: /user/interest/get-list/{category}
+          method: get
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                category: true
+  
+  get-all-list-of-attribute:
+    handler: api/user/data.lambda_handler
+    description: GET /user/get-list
+    events:
+      - http:
+          path: /user/get-list/{category}
+          method: get
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                category: true
 
 
 resources:

@@ -3,7 +3,7 @@ import boto3
 import os
 import traceback
 from api import utils
-from api.user.handlers import get_user_data, update_user_data, update_user_interest
+from api.user.handlers import get_user_data, update_user_data, update_user_interest, get_all_list_of_interest, get_all_list_of_attribute
 
 
 DYNAMODB = boto3.resource('dynamodb')
@@ -20,13 +20,20 @@ def lambda_handler(event, context):
         if method == "GET":
             if '/user/{user_id}' in resource:
                 res = get_user_data(event, USER_TABLE)
-                
+
+            if '/user/interest/get-list/{category}' in resource:
+                res = get_all_list_of_interest(event, USER_TABLE)
+            
+            if '/user/get-list/{category}' in resource:
+                res = get_all_list_of_attribute(event, USER_TABLE)
+
         if method == 'PATCH':
             if '/user/{user_id}' in resource:
                 res = update_user_data(event, USER_TABLE)
             
             if '/user/interest/{user_id}' in resource:
                 res = update_user_interest(event, USER_TABLE)
+
                 
     
     except ValueError as e:
