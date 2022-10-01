@@ -20,13 +20,20 @@ def update_user_data(event, table):
             '#gname': 'givenName',
             '#lname': 'familyName',
             '#email': 'email',
+            '#country': 'country',
+            '#province': 'province',
+            '#city': 'city',
         },
         ExpressionAttributeValues={
             ':givenName': item['givenName'],
             ':familyName': item['familyName'],
             ':email': item['email'],
+            ':country': item['country'],
+            ':province': item['province'],
+            ':city': item['city'],
         },
-        UpdateExpression='SET #gname = :givenName, #lname = :familyName, #email = :email',
+        UpdateExpression='SET #gname = :givenName, #lname = :familyName, #gender = :gender, #country = :country,'
+                         '#province = :province, #city = :city',
         ReturnValues="UPDATED_NEW"
     )
 
