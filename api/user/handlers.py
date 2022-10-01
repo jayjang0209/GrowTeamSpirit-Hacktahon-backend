@@ -1,5 +1,6 @@
 import json
 from api import utils
+from boto3.dynamodb.conditions import Key, Attr
 
 def update_user_data(event, table):
     """
@@ -110,8 +111,6 @@ def get_all_list_of_attribute(event, table):
     return utils.build_response(200, unique_attribute)
 
 
-
-
 def get_all_list_of_interest(event, table):
     """
     Get all list of each interest.
@@ -133,3 +132,29 @@ def get_all_list_of_interest(event, table):
                 if interest not in unique_interest:
                     unique_interest.append(interest)
     return utils.build_response(200, unique_interest)
+
+
+def get_filtered_user(event, table):
+    """
+    Get filtered user.
+
+    :param event: JSON formatted data triggered from an HTTP call via API gateway
+    :param table: target table
+    :return: response containing status code, headers, and body
+    """
+    city = event['pathParameters']['city']
+    interest = event['pathParameters']['interest']
+    print(city)
+    print(interest)
+
+    res = table.scan(
+        FilterExpression=Attr('city').eq(city) and Attr('sports').contains(interest)
+    )
+    
+    if len(res['Items']) == 0:
+        res = table.scan(
+            FilterExpression=Attr('city').eq(city) and Attr('outings').contains(interest)
+    )
+
+
+    return utils.build_response(200, res['Items'])

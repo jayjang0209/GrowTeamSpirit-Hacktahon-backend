@@ -3,7 +3,7 @@ import boto3
 import os
 import traceback
 from api import utils
-from api.user.handlers import get_user_data, update_user_data, update_user_interest, get_all_list_of_interest, get_all_list_of_attribute
+from api.user.handlers import get_user_data, update_user_data, update_user_interest, get_all_list_of_interest, get_all_list_of_attribute, get_filtered_user
 
 
 DYNAMODB = boto3.resource('dynamodb')
@@ -26,6 +26,9 @@ def lambda_handler(event, context):
             
             if '/user/get-list/{category}' in resource:
                 res = get_all_list_of_attribute(event, USER_TABLE)
+
+            if '/user/get-filtered-users/{city}/{interest}' in resource:
+                res = get_filtered_user(event, USER_TABLE)
 
         if method == 'PATCH':
             if '/user/{user_id}' in resource:

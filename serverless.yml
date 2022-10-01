@@ -122,6 +122,22 @@ functions:
               paths:
                 category: true
 
+  get-filtered-users:
+    handler: api/user/data.lambda_handler
+    description: GET /user/get-filtered-users
+    events:
+      - http:
+          path: /user/get-filtered-users/{city}/{interest}
+          method: get
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                city: true
+                interest: true
+
 
 resources:
  Resources:
