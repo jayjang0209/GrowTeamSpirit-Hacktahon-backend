@@ -2,10 +2,94 @@ service: hackathon-sap-db-beckend
 
 frameworkVersion: '3'
 
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
+
+plugins:
+  - serverless-offline
+  - serverless-python-requirements
+  - serverless-prune-plugin
+
+custom:
+  allowedHeaders:
+    - Accept
+    - Content-Type
+    - Content-Length
+    - Authorization
+    - X-Amz-Date
+    - X-Api-Key
+    - X-Amz-Security-Token
+    - X-Amz-User-Agent
+    - app_user_id
+    - app_user_name
+
 provider:
   name: aws
   runtime: python3.8
+  stage: ${opt:stage, 'dev'}
+  region: us-west-2
+  memorySize: 128
+  timeout: 5
+  environment:
+    USER_TABLE: Users-staging-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - "dynamodb:GetItem"
+      - "dynamodb:PutItem"
+      - "dynamodb:UpdateItem"
+      - "dynamodb:DeleteItem"
+      - "dynamodb:Query"
+    Resource: 
+      - "arn:aws:dynamodb:${opt: region, self:provider.region}:*:table/${self:provider.environment.USER_TABLE}"
 
 functions:
-  hello:
-    handler: handler.hello
+  update-user-data:
+    handler: api/user/data.lambda_handler
+    description: PATCH /user/
+    events:
+      - http:
+          path: user/{user_id}
+          method: patch
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                user_id: true
+
+  get-user-data:
+    handler: api/user/data.lambda_handler
+    description: GET /user/
+    events:
+      - http:
+          path: user/{user_id}
+          method: get
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                user_id: true
+
+
+resources:
+ Resources:
+   userTable:
+     Type: AWS::DynamoDB::Table
+     DeletionPolicy: Retain
+     Properties:
+       TableName: ${self:provider.environment.USER_TABLE}
+       AttributeDefinitions:
+         - AttributeName: id
+           AttributeType: S
+       KeySchema:
+         - AttributeName: id
+           KeyType: HASH
+       ProvisionedThroughput:
+         ReadCapacityUnits: 1
+         WriteCapacityUnits: 1
