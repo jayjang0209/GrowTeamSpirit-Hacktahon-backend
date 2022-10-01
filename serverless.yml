@@ -76,6 +76,21 @@ functions:
               paths:
                 user_id: true
 
+  update-user-interest:
+    handler: api/user/data.lambda_handler
+    description: PATCH /user/interest
+    events:
+      - http:
+          path: user/interest/{user_id}
+          method: patch
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                user_id: true
+
 
 resources:
  Resources:
