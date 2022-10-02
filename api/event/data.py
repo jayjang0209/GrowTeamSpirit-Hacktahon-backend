@@ -30,6 +30,9 @@ def lambda_handler(event, context):
             if '/event/get-my-events/{user_email}' in resource:
                 res = get_my_events(event, EVENT_TABLE)
 
+            if '/event/accept-event/{user_email}/{event_id}' in resource:
+                res = accept_event(event, EVENT_TABLE)
+
         if method == 'PATCH':
             if '/event/accept-event/{user_email}/{event_id}' in resource:
                 res = accept_event(event, EVENT_TABLE)

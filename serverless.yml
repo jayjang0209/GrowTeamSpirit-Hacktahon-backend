@@ -48,6 +48,12 @@ provider:
       - "arn:aws:dynamodb:${opt: region, self:provider.region}:*:table/${self:provider.environment.USER_TABLE}"
       - "arn:aws:dynamodb:${opt: region, self:provider.region}:*:table/${self:provider.environment.EVENT_TABLE}"
 
+  - Effect: "Allow"
+    Action:
+      - "ses:*"
+    Resource: 
+      - "*"        
+
 functions:
   update-user-data:
     handler: api/user/data.lambda_handler
@@ -155,6 +161,22 @@ functions:
               paths:
                 user_email: true
                 event_id: true
+
+  accept-event-get:
+    handler: api/event/data.lambda_handler
+    description: GET /event/accept-event
+    events:
+      - http:
+          path: /event/accept-event/{user_email}/{event_id}
+          method: get
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                user_email: true
+                event_id: true  
   
   cancel-event:
     handler: api/event/data.lambda_handler
@@ -217,6 +239,24 @@ functions:
             parameters:
               paths:
                 user_email: true
+
+          
+  
+  send-event-invitation:
+    handler: api/user/data.lambda_handler
+    description: POST /user/send-invitation
+    events:
+      - http:
+          path: /user/send-invitation/{user_email}/{event_id}
+          method: post
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                user_email: true
+                event_id: true
 
   generate_event:
     handler: api/event/generate_event.lambda_handler

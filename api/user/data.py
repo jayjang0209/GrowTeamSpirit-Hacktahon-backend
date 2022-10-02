@@ -3,12 +3,14 @@ import boto3
 import os
 import traceback
 from api import utils
-from api.user.handlers import get_user_data, update_user_data, update_user_interest, get_all_list_of_interest, get_all_list_of_attribute, get_filtered_user
+from api.user.handlers import get_user_data, update_user_data, update_user_interest, get_all_list_of_interest, get_all_list_of_attribute, get_filtered_user, send_invitation
 
 
 DYNAMODB = boto3.resource('dynamodb')
 TABLE_NAME_USER = os.getenv('USER_TABLE')
+TABLE_NAME_EVENT = os.getenv('EVENT_TABLE')
 USER_TABLE = DYNAMODB.Table(TABLE_NAME_USER)
+EVENT_TABLE = DYNAMODB.Table(TABLE_NAME_EVENT)
 
 def lambda_handler(event, context):
     resource = event['resource']
@@ -36,6 +38,10 @@ def lambda_handler(event, context):
             
             if '/user/interest/{user_id}' in resource:
                 res = update_user_interest(event, USER_TABLE)
+        
+        if method == 'POST':
+            if '/user/send-invitation/{user_email}/{event_id}' in resource:
+                res = send_invitation(event, EVENT_TABLE)
 
                 
     

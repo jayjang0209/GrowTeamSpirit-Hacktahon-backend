@@ -1,6 +1,8 @@
 import json
 from api import utils
 from boto3.dynamodb.conditions import Key, Attr
+import boto3
+from botocore.exceptions import ClientError
 
 def update_user_data(event, table):
     """
@@ -158,3 +160,101 @@ def get_filtered_user(event, table):
 
 
     return utils.build_response(200, res['Items'])
+
+
+def send_invitation(event, table):
+
+    user_email = event['pathParameters']['user_email']
+    event_id = event['pathParameters']['event_id']
+
+    # This address must be verified with Amazon SES.
+    SENDER = 'zhangqiangtianchen@gmail.com'
+  
+    # If your account is still in the sandbox, this address must be verified.
+    RECIPIENT = user_email
+    
+    res = table.get_item(
+        Key={'id': event_id}
+    )
+    event = res['Item']
+    
+    event_category = event['interest']
+    date = event['date']
+    city = event['city']
+    place = event['place']
+    time = event['time']
+
+
+
+    # The subject line for the email.
+    SUBJECT = f"invitation for {event_category} event on {date} in {city}"
+    
+    # The email body for recipients with non-HTML email clients.
+    BODY_TEXT = ("Amazon SES Test (Python)\r\n"
+                 "This email was sent with Amazon SES using the "
+                 "AWS SDK for Python (Boto)."
+                )
+                
+    # The HTML body of the email.
+    BODY_HTML = f"""<html>
+    <head></head>
+    <body>
+        <h1>Biweekly Event invitation !!</h1>
+        <p>Hi, this is a invitation for {event_category} event on {date} in {city}.</p>
+        
+        <h2>Event Details</h2>
+        <p>Date: {date}</p>
+        <p>Time: {time}</p>
+        <p>Place: {place}</p>
+        <p>Category: {event_category}</p>
+        <p>City: {city}</p>
+
+        <p>
+            <a href='https://4fhkr2hwj3.execute-api.us-west-2.amazonaws.com/prod/event/accept-event/{user_email}/{event_id}'>
+                Accept the invitation
+            </a>
+        </p>
+        
+        <p>Thank you</p>
+    </body>
+    </html>
+                """            
+    
+    # The character encoding for the email.
+    CHARSET = "UTF-8"
+    # Create SES client (edited)
+    ses = boto3.client('ses')
+    try:
+        #Provide the contents of the email.
+        response = ses.send_email(
+            Destination={
+                'ToAddresses': [
+                    RECIPIENT,
+                ],
+            },
+            Message={
+                'Body': {
+                    'Html': {
+                        'Charset': CHARSET,
+                        'Data': BODY_HTML,
+                    },
+                    'Text': {
+                        'Charset': CHARSET,
+                        'Data': BODY_TEXT,
+                    },
+                },
+                'Subject': {
+                    'Charset': CHARSET,
+                    'Data': SUBJECT,
+                },
+            },
+            Source=SENDER
+        )
+    # Display an error if something goes wrong. 
+    except ClientError as e:
+        print(e.response['Error']['Message'])
+    else:
+        print("Email sent! Message ID:"),
+        print(response['MessageId'])
+
+    return utils.build_response(200, 'email sent successfully')
