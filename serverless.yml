@@ -34,6 +34,7 @@ provider:
   timeout: 5
   environment:
     USER_TABLE: Users-staging-${opt:stage, self:provider.stage}
+    EVENT_TABLE: Event-staging-${opt:stage, self:provider.stage}
   iamRoleStatements:
   - Effect: "Allow"
     Action:
@@ -45,6 +46,7 @@ provider:
       - "dynamodb:Scan"
     Resource: 
       - "arn:aws:dynamodb:${opt: region, self:provider.region}:*:table/${self:provider.environment.USER_TABLE}"
+      - "arn:aws:dynamodb:${opt: region, self:provider.region}:*:table/${self:provider.environment.EVENT_TABLE}"
 
 functions:
   update-user-data:
@@ -138,6 +140,89 @@ functions:
                 city: true
                 interest: true
 
+  accept-event:
+    handler: api/event/data.lambda_handler
+    description: PATCH /event/accept-event
+    events:
+      - http:
+          path: /event/accept-event/{user_email}/{event_id}
+          method: patch
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                user_email: true
+                event_id: true
+  
+  cancel-event:
+    handler: api/event/data.lambda_handler
+    description: PATCH /event/cancel-event
+    events:
+      - http:
+          path: /event/cancel-event/{user_email}/{event_id}
+          method: patch
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                user_email: true
+                event_id: true
+
+  get-participants:
+    handler: api/event/data.lambda_handler
+    description: GET /event/get-participants
+    events:
+      - http:
+          path: /event/get-participants/{event_id}
+          method: get
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                event_id: true  
+
+  get-event:
+    handler: api/event/data.lambda_handler
+    description: GET /event/get-event
+    events:
+      - http:
+          path: /event/get-event/{event_id}
+          method: get
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                event_id: true  
+
+
+  get-my-events:
+    handler: api/event/data.lambda_handler
+    description: GET /event/get-my-events
+    events:
+      - http:
+          path: /event/get-my-events/{user_email}
+          method: get
+          cors:
+            origin: "*"
+            headers: ${self:custom.allowedHeaders}
+          request:
+            parameters:
+              paths:
+                user_email: true
+
+  generate_event:
+    handler: api/event/generate_event.lambda_handler
+    description: Generate event and send invitation to users
+    events:
+      - schedule: rate(14 days)
 
 resources:
  Resources:
@@ -155,3 +240,18 @@ resources:
        ProvisionedThroughput:
          ReadCapacityUnits: 1
          WriteCapacityUnits: 1
+
+   eventsTable:
+     Type: AWS::DynamoDB::Table
+     DeletionPolicy: Retain
+     Properties:
+       TableName: ${self:provider.environment.EVENT_TABLE}
+       AttributeDefinitions:
+         - AttributeName: id
+           AttributeType: S
+       KeySchema:
+         - AttributeName: id
+           KeyType: HASH
+       ProvisionedThroughput:
+         ReadCapacityUnits: 1
+         WriteCapacityUnits: 1       
